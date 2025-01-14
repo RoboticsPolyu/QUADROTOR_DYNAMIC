@@ -30,7 +30,7 @@ ENABLE_H:       TRUE
 
 EXPAN_P_SIGMA: 0
 
-BATCH_SIZE : 9000
+BATCH_SIZE : 20
 
 # Data file path
 ROOT_PATH: /Users/ypwen/IPN/IPN_MPC/data/NeuroBEM/merged_2021-02-18-17-26-00_seg_1.csv

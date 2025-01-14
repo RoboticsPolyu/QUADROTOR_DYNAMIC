@@ -1,7 +1,7 @@
 #include "calibration/Calibration_factor.h"
 #include "common/rapidcsv.h"
 #include "quadrotor_simulator/Dynamics_params.h"
-
+#include "Marginalization.h"
 
 #include <glog/logging.h>
 #include <yaml-cpp/yaml.h>
@@ -9,7 +9,7 @@
 using namespace gtsam;
 using namespace std;
 using namespace UAVFactor;
-
+using namespace dmvio;
 
 using symbol_shorthand::K; // kf
 using symbol_shorthand::J; // inertial of moments
@@ -50,6 +50,16 @@ typedef struct Actuator_control
 Pose3 interpolateRt(const::Pose3& T_l, const Pose3& T, double t) 
 {
     return Pose3(gtsam::interpolate<Rot3>(T_l.rotation(), T.rotation(), t), gtsam::interpolate<Point3>(T_l.translation(), T.translation(), t));
+}
+
+NonlinearFactorGraph removeFactors(const NonlinearFactorGraph& originalGraph, const std::set<size_t>& indicesToRemove) {
+    NonlinearFactorGraph newGraph;
+    for (size_t i = 0; i < originalGraph.size(); ++i) {
+        if (indicesToRemove.find(i) == indicesToRemove.end()) {
+            newGraph.add(originalGraph[i]);
+        }
+    }
+    return newGraph;
 }
 
 int main(void)
@@ -217,30 +227,38 @@ int main(void)
     initial_value_dyn.insert(A(0), ak);
     initial_value_dyn.insert(B(0), bk);
 
-    
+    int factor_idx = 0;
     if(!enable_inertia)
     {
         dyn_factor_graph.add(gtsam::PriorFactor<gtsam::Vector3>(J(0), gtsam::Vector3(quad_params.Ixx, quad_params.Iyy, quad_params.Izz), im_noise));
+        factor_idx++;
     }
 
     dyn_factor_graph.add(gtsam::PriorFactor<gtsam::Pose3>(D(0), gtsam::Pose3::identity(), bm_nosie));
+    factor_idx++;
 
     // dyn_factor_graph.add(gtsam::PriorFactor<gtsam::Rot3>(R(0), gtsam::Rot3::identity(), gr_noise));
     dyn_factor_graph.add(gtsam::PriorFactor<gtsam::Vector3>(P(0), rotor_p, rp_noise)); 
+    factor_idx++;
+
     dyn_factor_graph.add(gtsam::PriorFactor<double>(M(0), 0.001f, km_noise));
+    factor_idx++;
 
     if(!enable_drag)
     {
         dyn_factor_graph.add(gtsam::PriorFactor<gtsam::Vector3>(H(0), drag_k, im_noise)); 
+        factor_idx++;
     }
     if(!ENABLE_COG)
     {
         dyn_factor_graph.add(gtsam::PriorFactor<gtsam::Vector3>(A(0), A_k, im_noise)); 
+        factor_idx++;
     }
 
     if(!ENABLE_VISCOUS)   
     {
-        dyn_factor_graph.add(gtsam::PriorFactor<gtsam::Vector3>(B(0), B_k, im_noise)); 
+        dyn_factor_graph.add(gtsam::PriorFactor<gtsam::Vector3>(B(0), B_k, im_noise));
+        factor_idx++; 
     }
 
     // newTimestamps[J(0)] = 0.0;
@@ -319,6 +337,62 @@ int main(void)
             smootherBatch.update(dyn_factor_graph, initial_value_dyn, newTimestamps);
             // smootherBatch.calculateEstimate<Pose2>(currentKey).print("Batch Estimate:");
             result = smootherBatch.calculateEstimate();
+
+            // Margin
+            // gtsam::FastVector<gtsam::Key> keysToMarginalize;
+            // keysToMarginalize.push_back(X(0));
+            // keysToMarginalize.push_back(V(0));
+            // keysToMarginalize.push_back(S(0));
+            // boost::shared_ptr<gtsam::NonlinearFactorGraph> coarseGraph;
+
+            // coarseGraph = marginalizeOut(dyn_factor_graph, initial_value_dyn, keysToMarginalize, nullptr, true);
+            // coarseGraph->print();
+
+            // test remove factor
+            // std::set<size_t> indicesToRemove = {3, 4}; // 需要删除的因子索引
+            // dyn_factor_graph.print();
+            
+            // NonlinearFactorGraph newGraph = removeFactors(dyn_factor_graph, indicesToRemove);
+            // newGraph.print();
+
+            // const NonlinearFactorGraph smootherFactorsBeforeRemove = smootherBatch.getFactors();
+            // std::cout << "smootherFactorsBeforeRemove\n";
+            // smootherFactorsBeforeRemove.print();
+
+            // gtsam::NonlinearFactorGraph emptyNewFactors;
+            // gtsam::Values emptyNewValues;
+            // FixedLagSmoother::KeyTimestampMap emptyNewTimestamps;
+
+            // size_t factorIndex = factor_idx; // any index that does not break connectivity of the graph
+            
+            // FactorIndices factorToRemove{5,6,7,25};
+            // // factorToRemove.push_back(5);
+            // // factor_idx++;
+            // // factorToRemove.push_back(5);
+            
+            // std::cout << "update" << std::endl;
+            // smootherBatch.update(emptyNewFactors, emptyNewValues, emptyNewTimestamps, factorToRemove);
+
+            // const NonlinearFactorGraph newFactors = smootherBatch.getFactors();
+            // std::cout << "newFactors\n";
+            // newFactors.print();
+            // result = smootherBatch.calculateEstimate();
+
+            // FactorIndices factorToRemove2{22,23,44, 45};
+            // // factorToRemove.push_back(5);
+            // // factor_idx++;
+            // // factorToRemove.push_back(5);
+            
+            // std::cout << "update" << std::endl;
+            // smootherBatch.update(emptyNewFactors, emptyNewValues, emptyNewTimestamps, factorToRemove2);
+            
+            // const NonlinearFactorGraph newFactors2 = smootherBatch.getFactors();
+            // std::cout << "newFactors\n";
+            // newFactors2.print();
+            // result = smootherBatch.calculateEstimate();
+
+            return 0;
+            // test remove factor
 
             // smootherISAM2.update(dyn_factor_graph, initial_value_dyn, newTimestamps);
             // for(size_t i = 1; i < 2; ++i) { // Optionally perform multiple iSAM2 iterations

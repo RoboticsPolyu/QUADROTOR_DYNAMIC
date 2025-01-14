@@ -100,6 +100,8 @@ add_library(quadrotor_dynamics
             src/calibration/Calibration_inertial.cpp
             src/dynamics/Dynamics_control_factor.cpp
             src/dynamics/Dynamics_factor.cpp
+            src/GTSAMUtils.cpp
+            src/Marginalization.cpp
             src/dynamics/Quadrotor_SO3.cpp)
 
 target_link_libraries(quadrotor_dynamics PUBLIC gtsam gtsam_unstable ${Pangolin_LIBRARIES} ${YAML_CPP_LIBRARIES})
