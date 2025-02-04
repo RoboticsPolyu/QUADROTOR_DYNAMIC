@@ -131,13 +131,13 @@ int main(void)
     std::vector<float> motor4_csv = doc.GetColumn<float>("mot 4");
 
     std::ofstream calib_log;
-    std::string file_name = "../data/calib_";
+    std::string file_name = "../data/log/calib_";
     file_name.append("debug");
     file_name.append("_log.txt");
     calib_log.open(file_name);
 
     std::ofstream calib_params_log;
-    file_name = "../data/calib_";
+    file_name = "../data/log/calib_";
     file_name.append("params");
     file_name.append("_log.txt");
     calib_params_log.open(file_name);
@@ -151,7 +151,7 @@ int main(void)
         State                    _state;
         _state.timestamp       = t_csv[idx];
         _state.pose            = gtsam::Pose3(gtsam::Quaternion(quad_w_csv[idx], quad_x_csv[idx], quad_y_csv[idx], quad_z_csv[idx]), 
-            gtsam::Vector3(pos_x_csv[idx], pos_y_csv[idx], pos_z_csv[idx]));
+                                 gtsam::Vector3(pos_x_csv[idx], pos_y_csv[idx], pos_z_csv[idx]));
         _state.vel             = gtsam::Vector3(vel_x_csv[idx], vel_y_csv[idx], vel_z_csv[idx]);
         _state.body_rate       = gtsam::Vector3(ang_vel_x_csv[idx], ang_vel_y_csv[idx], ang_vel_z_csv[idx]);
         _state.actuator_output = gtsam::Vector4(motor1_csv[idx], motor2_csv[idx], motor3_csv[idx], motor4_csv[idx]);
@@ -166,7 +166,7 @@ int main(void)
         
     }
 
-    std::cout << "Data: " << Interp_states.size() << std::endl;
+    std::cout << "Data size : " << Interp_states.size() << std::endl;
     // for(int index = 1; index < Interp_states.size(); index++)
     // {
     //     gtsam::Vector3 vel    = (Interp_states[index-1].pose.translation() - Interp_states[index].pose.translation())/dt;
@@ -333,75 +333,10 @@ int main(void)
             // std::cout << "###################### init contoller optimizer ######################" << std::endl;
             // LevenbergMarquardtOptimizer optimizer(dyn_factor_graph, initial_value_dyn, parameters);
 
-            std::cout << "###################### begin optimize ######################" << std::endl;
+            std::cout << "###################### Start optimization ######################" << std::endl;
             smootherBatch.update(dyn_factor_graph, initial_value_dyn, newTimestamps);
             // smootherBatch.calculateEstimate<Pose2>(currentKey).print("Batch Estimate:");
             result = smootherBatch.calculateEstimate();
-
-            // Margin
-            // gtsam::FastVector<gtsam::Key> keysToMarginalize;
-            // keysToMarginalize.push_back(X(0));
-            // keysToMarginalize.push_back(V(0));
-            // keysToMarginalize.push_back(S(0));
-            // boost::shared_ptr<gtsam::NonlinearFactorGraph> coarseGraph;
-
-            // coarseGraph = marginalizeOut(dyn_factor_graph, initial_value_dyn, keysToMarginalize, nullptr, true);
-            // coarseGraph->print();
-
-            // test remove factor
-            // std::set<size_t> indicesToRemove = {3, 4}; // 需要删除的因子索引
-            // dyn_factor_graph.print();
-            
-            // NonlinearFactorGraph newGraph = removeFactors(dyn_factor_graph, indicesToRemove);
-            // newGraph.print();
-
-            // const NonlinearFactorGraph smootherFactorsBeforeRemove = smootherBatch.getFactors();
-            // std::cout << "smootherFactorsBeforeRemove\n";
-            // smootherFactorsBeforeRemove.print();
-
-            // gtsam::NonlinearFactorGraph emptyNewFactors;
-            // gtsam::Values emptyNewValues;
-            // FixedLagSmoother::KeyTimestampMap emptyNewTimestamps;
-
-            // size_t factorIndex = factor_idx; // any index that does not break connectivity of the graph
-            
-            // FactorIndices factorToRemove{5,6,7,25};
-            // // factorToRemove.push_back(5);
-            // // factor_idx++;
-            // // factorToRemove.push_back(5);
-            
-            // std::cout << "update" << std::endl;
-            // smootherBatch.update(emptyNewFactors, emptyNewValues, emptyNewTimestamps, factorToRemove);
-
-            // const NonlinearFactorGraph newFactors = smootherBatch.getFactors();
-            // std::cout << "newFactors\n";
-            // newFactors.print();
-            // result = smootherBatch.calculateEstimate();
-
-            // FactorIndices factorToRemove2{22,23,44, 45};
-            // // factorToRemove.push_back(5);
-            // // factor_idx++;
-            // // factorToRemove.push_back(5);
-            
-            // std::cout << "update" << std::endl;
-            // smootherBatch.update(emptyNewFactors, emptyNewValues, emptyNewTimestamps, factorToRemove2);
-            
-            // const NonlinearFactorGraph newFactors2 = smootherBatch.getFactors();
-            // std::cout << "newFactors\n";
-            // newFactors2.print();
-            // result = smootherBatch.calculateEstimate();
-
-            return 0;
-            // test remove factor
-
-            // smootherISAM2.update(dyn_factor_graph, initial_value_dyn, newTimestamps);
-            // for(size_t i = 1; i < 2; ++i) { // Optionally perform multiple iSAM2 iterations
-            //     smootherISAM2.update();
-            // }
-
-            // std::cout << "###################### begin optimize ######################" << std::endl;
-            // // result = optimizer.optimize();
-            // result = smootherISAM2.calculateEstimate();
 
             IM  = result.at<gtsam::Vector3>(J(0));
             rot = result.at<gtsam::Rot3>(R(0));
@@ -431,6 +366,18 @@ int main(void)
             dyn_factor_graph.add(dynamicsCalibFactor);
         }
     }
+
+    std::cout << "Inertial of moment:" << IM.transpose() << "\n";
+    std::cout << "Gravity Rot:     " << rot.rpy().transpose() << "\n";
+    std::cout << "Rotor p:         " << p.transpose() << "\n";
+    std::cout << "Kf:              " << kf << "\n";
+    std::cout << "Km:              " << km << std::endl;
+    std::cout << "bTm t:           " << bTm.translation().transpose() << "\n";
+    std::cout << "bTm r:           " << bTm.rotation().rpy().transpose() << "\n";
+    std::cout << "drag k:          " << dk.transpose() << "\n";
+    std::cout << "HoG k and HVT:   " << ak.transpose() << "\n";
+    std::cout << "Viscous k:       " << bk.transpose() << "\n";
+
     // print error
     
     for(uint32_t idx = DATASET_S; idx < DATASET_LENS - 1; idx++)
@@ -478,17 +425,6 @@ int main(void)
         << " " << v_t(0) << " " << v_t(1) << " " << v_t(2) << std::endl;
         // << " " << Interp_states.at(idx).vel.x() << " " << Interp_states.at(idx).vel.y() << " " << Interp_states.at(idx).vel.z() << std::endl;
     }
-
-    std::cout << "Inertial of moment:" << IM.transpose() << "\n";
-    std::cout << "Gravity Rot:     " << rot.rpy().transpose() << "\n";
-    std::cout << "Rotor p:         " << p.transpose() << "\n";
-    std::cout << "Kf:              " << kf << "\n";
-    std::cout << "Km:              " << km << std::endl;
-    std::cout << "bTm t:           " << bTm.translation().transpose() << "\n";
-    std::cout << "bTm r:           " << bTm.rotation().rpy().transpose() << "\n";
-    std::cout << "drag k:          " << dk.transpose() << "\n";
-    std::cout << "HoG k and HVT:             " << ak.transpose() << "\n";
-    std::cout << "Viscous k:             " << bk.transpose() << "\n";
 
     return 0;
 }

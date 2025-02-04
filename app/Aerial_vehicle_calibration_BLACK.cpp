@@ -94,7 +94,7 @@ int main(void)
     auto bm_nosie    = noiseModel::Diagonal::Sigmas((Vector(6) << Vector3::Constant(0.00001), Vector3::Constant(0.00001)).finished());
 
     std::ofstream calib_log;
-    std::string file_name = "../data/calib_";
+    std::string file_name = "../data/log/calib_";
     file_name.append("debug");
     file_name.append("_log.txt");
     calib_log.open(file_name);
@@ -251,7 +251,7 @@ int main(void)
     parameters.verbosityLM      = gtsam::LevenbergMarquardtParams::SUMMARY;
     std::cout << "###################### init contoller optimizer ######################" << std::endl;
     LevenbergMarquardtOptimizer optimizer(dyn_factor_graph, initial_value_dyn, parameters);
-    std::cout << "###################### begin optimize ######################" << std::endl;
+    std::cout << "###################### Start optimization ######################" << std::endl;
     Values result = optimizer.optimize();
     
 

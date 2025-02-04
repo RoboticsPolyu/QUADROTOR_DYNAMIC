@@ -15,8 +15,8 @@ font = {'family' : 'Times New Roman',
 plt.rc('font', **font)
 
 # POS_SIGMA 0.01m MPC Precise
-# file = '/Users/ypwen/IPN/IPN_MPC/data/JEC_MPC_PRE_TEST_log.txt'
-# file = '/Users/ypwen/IPN/IPN_MPC/data/JEC_MPC_onlyGNSS_5_1__log.txt'
+# file = '../data/JEC_MPC_PRE_TEST_log.txt'
+# file = '../data/JEC_MPC_onlyGNSS_5_1__log.txt'
 
 # data = np.loadtxt(file)
 
@@ -63,8 +63,8 @@ plt.rc('font', **font)
 # print("MPC RMSEX: %f", RMSEZ)
 
 
-# file = '/Users/ypwen/IPN/IPN_MPC/data/JEC_MPC_PRE_TEST_log.txt'
-file = '/Users/ypwen/IPN/IPN_MPC/data/JEC_JPCM_TEST_D0.1_log.txt'
+# file = '../data/JEC_MPC_PRE_TEST_log.txt'
+file = '../data/JEC_JPCM_TEST_D0.1_log.txt'
 
 data = np.loadtxt(file)
 

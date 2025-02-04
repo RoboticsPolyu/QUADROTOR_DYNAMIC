@@ -36,11 +36,11 @@ ENABLE_H:    TRUE
 
 # Data file path
 ROOT_PATH: ../data/blackbird/ampersand/yawConstant/maxSpeed3p0
-# ROOT_PATH: /Users/ypwen/IPN/IPN_MPC/data/blackbird/ampersand/yawForward/maxSpeed2p0
-# ROOT_PATH: /Users/ypwen/IPN/IPN_MPC/data/blackbird/pacasso/yawForward/maxSpeed4p0
+# ROOT_PATH: ../data/blackbird/ampersand/yawForward/maxSpeed2p0
+# ROOT_PATH: ../data/blackbird/pacasso/yawForward/maxSpeed4p0
 
 
-POSE_FILE: /Users/ypwen/IPN/IPN_MPC/data/quad13/pose_2024-02-21-13-45-50.txt
-RSM_FILE: /Users/ypwen/IPN/IPN_MPC/data/quad13/rsm_2024-02-21-13-45-50.txt
+POSE_FILE: ../data/quad13/pose_2024-02-21-13-45-50.txt
+RSM_FILE: ../data/quad13/rsm_2024-02-21-13-45-50.txt
 
 LOG_FILE: /Users/ypwen/Chao/2023-10-29-00-44-03/log_2_2023-10-21-21-45-16.ulg

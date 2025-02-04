@@ -48,7 +48,7 @@ plt.rcParams['ytick.direction'] = 'in'
 # << " " << vel_body(0) << " " << vel_body(1) << " " << vel_body(2) 
 # << " " << Interp_states.at(idx).omega.x() << " " << Interp_states.at(idx).omega.y() << " " << Interp_states.at(idx).omega.z() 
 
-file = '/Users/ypwen/IPN/IPN_MPC/data/motor_calib_debug_log.txt'
+file = '../data/motor_log/calib_debug_log.txt'
 
 # data1.pwm << " " << data1.rotor_speed1 << " " << data2.rotor_speed1 - data1.rotor_speed1 
 data = np.loadtxt(file)

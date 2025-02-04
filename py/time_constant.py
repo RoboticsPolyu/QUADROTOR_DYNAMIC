@@ -22,8 +22,8 @@ def limit(x):
       x[iter] = 3.14159*2 + x[iter]
   return x
 # POS_SIGMA 0.01m MPC Precise
-# file = '/Users/ypwen/IPN/IPN_MPC/data/JEC_MPC_PRE_TEST_log.txt'
-# file = '/Users/ypwen/IPN/IPN_MPC/data/JEC_MPC_onlyGNSS_5_1__log.txt'
+# file = '../data/JEC_MPC_PRE_TEST_log.txt'
+# file = '../data/JEC_MPC_onlyGNSS_5_1__log.txt'
 
 # data = np.loadtxt(file)
 
@@ -70,8 +70,8 @@ def limit(x):
 # print("MPC RMSEX: %f", RMSEZ)
 
 
-# file = '/Users/ypwen/IPN/IPN_MPC/data/JEC_MPC_PRE_TEST_log.txt'
-file = '/Users/ypwen/IPN/IPN_MPC/data/JEC_JPCM_TimeConstant25_log.txt'
+# file = '../data/JEC_MPC_PRE_TEST_log.txt'
+file = '../data/JEC_JPCM_TimeConstant25_log.txt'
 
 data = np.loadtxt(file)
 

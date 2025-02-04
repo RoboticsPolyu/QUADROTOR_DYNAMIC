@@ -137,7 +137,7 @@ int main(void)
     parameters.verbosityLM      = gtsam::LevenbergMarquardtParams::SUMMARY;
     std::cout << "###################### init contoller optimizer ######################" << std::endl;
     LevenbergMarquardtOptimizer optimizer(dyn_factor_graph, initial_value_dyn, parameters);
-    std::cout << "###################### begin optimize ######################" << std::endl;
+    std::cout << "###################### Start optimization ######################" << std::endl;
     Values result = optimizer.optimize();
     
     params = result.at<gtsam::Vector5>(K(0));

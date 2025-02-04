@@ -98,7 +98,7 @@ int main(void)
     auto bm_nosie     = noiseModel::Diagonal::Sigmas((Vector(6) << Vector3::Constant(0.00001), Vector3::Constant(0.00001)).finished());
 
     std::ofstream calib_log;
-    std::string file_name = "../data/calib_";
+    std::string file_name = "../data/log/calib_";
     file_name.append("debug");
     file_name.append("_log.txt");
     calib_log.open(file_name);
@@ -114,7 +114,7 @@ int main(void)
     std::vector<Actuator_control> Uav_pwms;
 
     std::ifstream NeuroBEM_file;
-    std::string NeuroBEM_path = "/Users/ypwen/IPN/IPN_MPC/data/NeuroBEM/test1/neuro_bem.txt";
+    std::string NeuroBEM_path = "../data/NeuroBEM/test1/neuro_bem.txt";
     NeuroBEM_file.open(NeuroBEM_path);
 
     double gt_t, gt_qw, gt_qx, gt_qy, gt_qz, gt_x, gt_y, gt_z, pwm_t, pwm1, pwm2, pwm3, pwm4, gt_vx, gt_vy, gt_vz, ang_vel_x, ang_vel_y, ang_vel_z, vel_x, vel_y, vel_z;
@@ -300,7 +300,7 @@ int main(void)
             std::cout << "###################### init contoller optimizer ######################" << std::endl;
             LevenbergMarquardtOptimizer optimizer(dyn_factor_graph, initial_value_dyn, parameters);
 
-            // std::cout << "###################### begin optimize ######################" << std::endl;
+            // std::cout << "###################### Start optimization ######################" << std::endl;
             // smootherBatch.update(dyn_factor_graph, initial_value_dyn, newTimestamps);
             // smootherBatch.calculateEstimate<Pose2>(currentKey).print("Batch Estimate:");
             // result = smootherBatch.calculateEstimate();
@@ -310,7 +310,7 @@ int main(void)
             //     smootherISAM2.update();
             // }
 
-            std::cout << "###################### begin optimize ######################" << std::endl;
+            std::cout << "###################### Start optimization ######################" << std::endl;
             result = optimizer.optimize();
             // result = smootherISAM2.calculateEstimate();
 

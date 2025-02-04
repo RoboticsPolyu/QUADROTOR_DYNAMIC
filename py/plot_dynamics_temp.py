@@ -50,7 +50,7 @@ plt.rcParams['ytick.direction'] = 'in'
         # << " " << thrust_torque(0)<< " " << thrust_torque(1) << " " << thrust_torque(2) << " " << thrust_torque(3) << " " << thrust_torque(4) << " " << thrust_torque(5) 
         # << " " << vel_body(0) << " " << vel_body(1) << " " << vel_body(2) 
         # << " " << Interp_states.at(idx).omega.x() << " " << Interp_states.at(idx).omega.y() << " " << Interp_states.at(idx).omega.z() 
-file = '/Users/ypwen/IPN/IPN_MPC/data/calib_debug_log_quad13.txt'
+file = '../data/log/calib_debug_log_quad13.txt'
 
 data = np.loadtxt(file)
 

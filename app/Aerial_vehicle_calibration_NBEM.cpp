@@ -97,7 +97,7 @@ int main(void)
     auto bm_nosie     = noiseModel::Diagonal::Sigmas((Vector(6) << Vector3::Constant(0.00001), Vector3::Constant(0.00001)).finished());
 
     std::ofstream calib_log;
-    std::string file_name = "../data/calib_";
+    std::string file_name = "../data/log/calib_";
     file_name.append("debug");
     file_name.append("_log.txt");
     calib_log.open(file_name);
@@ -107,7 +107,7 @@ int main(void)
     std::vector<Actuator_control> Uav_pwms;
 
     std::ifstream NeuroBEM_file;
-    std::string NeuroBEM_path = "/Users/ypwen/IPN/IPN_MPC/data/NeuroBEM/test1/neuro_bem.txt";
+    std::string NeuroBEM_path = "../data/NeuroBEM/test1/neuro_bem.txt";
     NeuroBEM_file.open(NeuroBEM_path);
 
     double gt_t, gt_qw, gt_qx, gt_qy, gt_qz, gt_x, gt_y, gt_z, pwm_t, pwm1, pwm2, pwm3, pwm4, gt_vx, gt_vy, gt_vz, ang_vel_x, ang_vel_y, ang_vel_z, vel_x, vel_y, vel_z;
@@ -232,7 +232,7 @@ int main(void)
     parameters.verbosityLM      = gtsam::LevenbergMarquardtParams::SUMMARY;
     std::cout << "###################### init contoller optimizer ######################" << std::endl;
     LevenbergMarquardtOptimizer optimizer(dyn_factor_graph, initial_value_dyn, parameters);
-    std::cout << "###################### begin optimize ######################" << std::endl;
+    std::cout << "###################### Start optimization ######################" << std::endl;
     Values result = optimizer.optimize();
     
 
@@ -246,6 +246,16 @@ int main(void)
     gtsam::Vector3  ak = result.at<gtsam::Vector3>(A(0));
     gtsam::Vector3  bk = result.at<gtsam::Vector3>(B(0));
 
+    std::cout << "Inertial of moment:" << IM.transpose() << "\n";
+    std::cout << "Gravity Rot:     " << rot.rpy().transpose() << "\n";
+    std::cout << "Rotor p:         " << p.transpose() << "\n";
+    std::cout << "Kf:              " << kf << "\n";
+    std::cout << "Km:              " << km << std::endl;
+    std::cout << "bTm t:           " << bTm.translation().transpose() << "\n";
+    std::cout << "bTm r:           " << bTm.rotation().rpy().transpose() << "\n";
+    std::cout << "drag k:          " << dk.transpose() << "\n";
+    std::cout << "HoG k and HVT:   " << ak.transpose() << "\n";
+    std::cout << "Viscous k:       " << bk.transpose() << "\n";
 
     for(uint32_t idx = DATASET_S; idx < DATASET_LENS - 1; idx++)
     {
@@ -298,17 +308,6 @@ int main(void)
         << std::endl;
         // << " " << Interp_states.at(idx).vel.x() << " " << Interp_states.at(idx).vel.y() << " " << Interp_states.at(idx).vel.z() << std::endl;
     }
-
-    std::cout << "Inertial of moment:" << IM.transpose() << "\n";
-    std::cout << "Gravity Rot:     " << rot.rpy().transpose() << "\n";
-    std::cout << "Rotor p:         " << p.transpose() << "\n";
-    std::cout << "Kf:              " << kf << "\n";
-    std::cout << "Km:              " << km << std::endl;
-    std::cout << "bTm t:           " << bTm.translation().transpose() << "\n";
-    std::cout << "bTm r:           " << bTm.rotation().rpy().transpose() << "\n";
-    std::cout << "drag k:          " << dk.transpose() << "\n";
-    std::cout << "HoG k and HVT:             " << ak.transpose() << "\n";
-    std::cout << "Viscous k:             " << bk.transpose() << "\n";
 
     return 0;
 }
