@@ -1,6 +1,6 @@
 #include "calibration/Calibration_factor.h"
 #include "common/rapidcsv.h"
-#include "quadrotor_simulator/Dynamics_params.h"
+#include "quadrotor/Dynamics_params.h"
 #include "Marginalization.h"
 
 #include <glog/logging.h>
@@ -46,21 +46,6 @@ typedef struct Actuator_control
 
 } Actuator_control;
 
-// Pose slerp interpolation
-Pose3 interpolateRt(const::Pose3& T_l, const Pose3& T, double t) 
-{
-    return Pose3(gtsam::interpolate<Rot3>(T_l.rotation(), T.rotation(), t), gtsam::interpolate<Point3>(T_l.translation(), T.translation(), t));
-}
-
-NonlinearFactorGraph removeFactors(const NonlinearFactorGraph& originalGraph, const std::set<size_t>& indicesToRemove) {
-    NonlinearFactorGraph newGraph;
-    for (size_t i = 0; i < originalGraph.size(); ++i) {
-        if (indicesToRemove.find(i) == indicesToRemove.end()) {
-            newGraph.add(originalGraph[i]);
-        }
-    }
-    return newGraph;
-}
 
 int main(void)
 {
@@ -76,24 +61,25 @@ int main(void)
 
 
     // Configuration file 
-    YAML::Node CAL_config = YAML::LoadFile("../config/dynamics_NeuroBEM_csv.yaml");  
-    double     rotor_px   = CAL_config["ROTOR_P_X"].as<double>();
-    double     rotor_py   = CAL_config["ROTOR_P_Y"].as<double>();
-    uint16_t DATASET_S    = CAL_config["DATASET_S"].as<uint16_t>();
-    uint16_t DATASET_LENS = CAL_config["DATASET_L"].as<uint16_t>();
-    double p_thrust_sigma = CAL_config["P_T_SIGMA"].as<double>();
-    double unmodel_thrust_sigma = CAL_config["U_T_SIGMA"].as<double>();
-    std::string file_path = CAL_config["ROOT_PATH"].as<std::string>();
-    bool ENABLE_COG       = CAL_config["ENABLE_COG"].as<bool>();
-    bool ENABLE_VISCOUS   = CAL_config["ENABLE_VISCOUS"].as<bool>();
-    bool enable_inertia   = CAL_config["ENABLE_I"].as<bool>();
-    bool enable_drag      = CAL_config["ENABLE_DRAG"].as<bool>();
-    double expan_pos_sigma = CAL_config["EXPAN_P_SIGMA"].as<double>();
-    uint16_t batch_size   = CAL_config["BATCH_SIZE"].as<uint16_t>();
+    YAML::Node  CAL_config      = YAML::LoadFile("../config/dynamics_NeuroBEM_csv.yaml");  
+    double      rotor_px        = CAL_config["ROTOR_P_X"].as<double>();
+    double      rotor_py        = CAL_config["ROTOR_P_Y"].as<double>();
+    uint16_t    DATASET_S       = CAL_config["DATASET_S"].as<uint16_t>();
+    uint16_t    DATASET_LENS    = CAL_config["DATASET_L"].as<uint16_t>();
+    double      p_thrust_sigma  = CAL_config["P_T_SIGMA"].as<double>();
+    double      unmodel_t_sigma = CAL_config["U_T_SIGMA"].as<double>();
+    std::string file_path       = CAL_config["ROOT_PATH"].as<std::string>();
+    bool        ENABLE_COG      = CAL_config["ENABLE_COG"].as<bool>();
+    bool        ENABLE_VISCOUS  = CAL_config["ENABLE_VISCOUS"].as<bool>();
+    bool        enable_inertia  = CAL_config["ENABLE_I"].as<bool>();
+    bool        enable_drag     = CAL_config["ENABLE_DRAG"].as<bool>();
+    double      expan_pos_sigma = CAL_config["EXPAN_P_SIGMA"].as<double>();
+    uint16_t    batch_size      = CAL_config["BATCH_SIZE"].as<uint16_t>();
 
-    gtsam::Vector3 thrust_sigma(unmodel_thrust_sigma, unmodel_thrust_sigma, 2* p_thrust_sigma);
+    gtsam::Vector3 thrust_sigma( unmodel_t_sigma,  unmodel_t_sigma, 2* p_thrust_sigma);
     // sigma = (rotor_p_x* 2* P_thrust_single_rotor, rotor_p_x* 2* P_thrust_single_rotor, k_m * 2 * P_thrust_single_rotor) 
     gtsam::Vector3 moments_sigma(p_thrust_sigma * 2 * rotor_py, p_thrust_sigma * 2 * rotor_px, 0.01f * 2 * p_thrust_sigma);
+    
     auto vel_noise    = noiseModel::Diagonal::Sigmas(Vector3(0.0001, 0.0001, 0.0001));
     auto ang_s_noise  = noiseModel::Diagonal::Sigmas(Vector3(0.0001, 0.0001, 0.0001));
 
@@ -167,15 +153,6 @@ int main(void)
     }
 
     std::cout << "Data size : " << Interp_states.size() << std::endl;
-    // for(int index = 1; index < Interp_states.size(); index++)
-    // {
-    //     gtsam::Vector3 vel    = (Interp_states[index-1].pose.translation() - Interp_states[index].pose.translation())/dt;
-    //     // gtsam::Vector3 ag_vel = gtsam::Rot3::Logmap(Interp_states[index-1].pose.rotation().between(Interp_states[index].pose.rotation()))/dt;
-
-    //     Interp_states[index].vel = vel;
-    //     // Interp_states[index].omega = ag_vel;
-
-    // }
 
     // Define the smoother lag (in seconds)
     double lag = 2.0;
@@ -261,14 +238,6 @@ int main(void)
         factor_idx++; 
     }
 
-    // newTimestamps[J(0)] = 0.0;
-    // newTimestamps[D(0)] = 0.0;
-    // newTimestamps[P(0)] = 0.0;
-    // newTimestamps[M(0)] = 0.0;
-    // newTimestamps[H(0)] = 0.0;
-    // newTimestamps[A(0)] = 0.0;
-    // newTimestamps[B(0)] = 0.0;
-
     for(uint32_t idx = DATASET_S; idx < DATASET_LENS; idx++)
     {
         gtsam::Vector3 vel;
@@ -323,15 +292,6 @@ int main(void)
             initial_value_dyn.insert(S(idx+1), Interp_states.at(idx+1).body_rate);
 
             idx++;
-
-            // gtsam::LevenbergMarquardtParams parameters;
-            // parameters.absoluteErrorTol = 1e-8;
-            // parameters.relativeErrorTol = 1e-8;
-            // parameters.maxIterations    = 500;
-            // parameters.verbosity        = gtsam::NonlinearOptimizerParams::ERROR;
-            // parameters.verbosityLM      = gtsam::LevenbergMarquardtParams::SUMMARY;
-            // std::cout << "###################### init contoller optimizer ######################" << std::endl;
-            // LevenbergMarquardtOptimizer optimizer(dyn_factor_graph, initial_value_dyn, parameters);
 
             std::cout << "###################### Start optimization ######################" << std::endl;
             smootherBatch.update(dyn_factor_graph, initial_value_dyn, newTimestamps);

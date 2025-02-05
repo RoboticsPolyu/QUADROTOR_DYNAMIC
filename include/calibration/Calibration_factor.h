@@ -2,8 +2,8 @@
 #define __CALIBRATION_FACTOR_H__
 
 #include "gtsam_wrapper.h"
-#include "quadrotor_simulator/Dynamics_factor.h"
-#include "quadrotor_simulator/Dynamics_params.h"
+#include "quadrotor/Dynamics_factor.h"
+#include "quadrotor/Dynamics_params.h"
 
 using namespace gtsam_wrapper;
 

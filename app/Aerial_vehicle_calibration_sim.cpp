@@ -1,10 +1,10 @@
 #include "calibration/Calibration_factor.h"
 #include "color.h"
-#include "quadrotor_simulator/Dynamics_control_factor.h"
-#include "quadrotor_simulator/Dynamics_params.h"
+#include "quadrotor/Dynamics_control_factor.h"
+#include "quadrotor/Dynamics_params.h"
 #include "trajectory_generator/Trajectory_generator.h"
 #include <yaml-cpp/yaml.h>
-#include "quadrotor_simulator/Quadrotor_SO3.h"
+#include "quadrotor/Quadrotor_SO3.h"
 
 using namespace Calib;
 using namespace gtsam;

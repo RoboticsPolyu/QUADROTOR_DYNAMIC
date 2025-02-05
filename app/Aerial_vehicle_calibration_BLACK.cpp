@@ -1,5 +1,5 @@
 #include "calibration/Calibration_factor.h"
-#include "quadrotor_simulator/Dynamics_params.h"
+#include "quadrotor/Dynamics_params.h"
 
 #include <yaml-cpp/yaml.h>
 
@@ -69,7 +69,7 @@ int main(void)
     uint16_t DATASET_S    = CAL_config["DATASET_S"].as<uint16_t>();
     uint16_t DATASET_LENS = CAL_config["DATASET_L"].as<uint16_t>();
     double p_thrust_sigma = CAL_config["P_T_SIGMA"].as<double>();
-    double unmodel_thrust_sigma = CAL_config["U_T_SIGMA"].as<double>();
+    double unmodel_t_sigma = CAL_config["U_T_SIGMA"].as<double>();
     std::string file_path = CAL_config["ROOT_PATH"].as<std::string>();
     bool enable_drag      = CAL_config["ENABLE_DRAG"].as<bool>();
     bool enable_inertia   = CAL_config["ENABLE_I"].as<bool>();
@@ -79,7 +79,7 @@ int main(void)
     quad_params.Iyy       = CAL_config["INERTIA_IY"].as<double>();
     quad_params.Izz       = CAL_config["INERTIA_IZ"].as<double>();
 
-    gtsam::Vector3 thrust_sigma(unmodel_thrust_sigma, unmodel_thrust_sigma, 2* p_thrust_sigma);
+    gtsam::Vector3 thrust_sigma(unmodel_t_sigma, unmodel_t_sigma, 2* p_thrust_sigma);
     // sigma = (rotor_p_x* 2* P_thrust_single_rotor, rotor_p_x* 2* P_thrust_single_rotor, k_m * 2 * P_thrust_single_rotor) 
     gtsam::Vector3 moments_sigma(p_thrust_sigma * 2 * rotor_py, p_thrust_sigma * 2 * rotor_px, 0.01f * 2 * p_thrust_sigma);
 
